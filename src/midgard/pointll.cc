@@ -51,17 +51,26 @@ GeoPoint<PrecisionT> GeoPoint<PrecisionT>::PointAlongSegment(const GeoPoint<Prec
 template <typename PrecisionT>
 PrecisionT GeoPoint<PrecisionT>::Distance(const GeoPoint& other) const {
   // Equal points short-circuit
-  if (*this == other) return static_cast<PrecisionT>(0);
+  if (*this == other) {
+    return static_cast<PrecisionT>(0);
+  }
 
   // Promote to extended precision for the trig
   const long double phi1 = static_cast<long double>(lat()) * static_cast<long double>(kRadPerDegD);
-  const long double phi2 = static_cast<long double>(other.lat()) * static_cast<long double>(kRadPerDegD);
+  const long double phi2 =
+      static_cast<long double>(other.lat()) * static_cast<long double>(kRadPerDegD);
   const long double dphi = phi2 - phi1;
 
-  long double dlambda = static_cast<long double>(other.lng() - lng()) * static_cast<long double>(kRadPerDegD);
-  // No need to wrap at +/-pi for distance; cos terms handle it, but keeping dlambda small helps tiny-angle math
-  if (dlambda > M_PI)  dlambda -= 2.0L * M_PI;
-  if (dlambda < -M_PI) dlambda += 2.0L * M_PI;
+  long double dlambda =
+      static_cast<long double>(other.lng() - lng()) * static_cast<long double>(kRadPerDegD);
+  // No need to wrap at +/-pi for distance; cos terms handle it, but keeping dlambda small helps
+  // tiny-angle math
+  if (dlambda > M_PI) {
+    dlambda -= 2.0L * M_PI;
+  }
+  if (dlambda < -M_PI) {
+    dlambda += 2.0L * M_PI;
+  }
 
   const long double c1 = std::cos(phi1);
   const long double c2 = std::cos(phi2);
@@ -69,7 +78,7 @@ PrecisionT GeoPoint<PrecisionT>::Distance(const GeoPoint& other) const {
   // Haversine (well-conditioned for small angles)
   const long double sdphi2 = std::sin(dphi * 0.5L);
   const long double sdlmb2 = std::sin(dlambda * 0.5L);
-  long double h = sdphi2*sdphi2 + c1*c2*sdlmb2*sdlmb2;
+  long double h = sdphi2 * sdphi2 + c1 * c2 * sdlmb2 * sdlmb2;
 
   // Clamp due to rounding
   h = std::min<long double>(1, std::max<long double>(0, h));
