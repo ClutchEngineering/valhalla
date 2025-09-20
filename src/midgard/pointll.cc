@@ -41,12 +41,18 @@ GeoPoint<PrecisionT> GeoPoint<PrecisionT>::PointAlongSegment(const GeoPoint<Prec
 }
 
 /**
- * Calculates the distance between two lng,lat's in meters. Uses spherical
- * geometry (law of cosines).
- * Note - this method loses precision when the points are within ~1m of each
- *        other, and cannot meaningfully meausre distances less than that.
- * @param   ll2   Second lng,lat position to calculate distance to.
- * @return  Returns the distance in meters.
+ * Calculates the great-circle distance between two longitude/latitude points, in meters.
+ *
+ * Prioritizes numerical stability and precision even for small distances:
+ *  - Uses the haversine formula (numerically stable for small angles) with
+ *    extended-precision (`long double`).
+ *  - Explicitly wraps longitude differences within [-pi, pi] for dateline crossings.
+ *  - Clamps intermediate values to protect against rounding errors.
+ *  - For extremely small distances, falls back to an equirectangular approximation with `hypot`
+ *    to avoid instability of asin/sqrt near zero.
+ *
+ * @param other  Second GeoPoint to measure distance to.
+ * @return       Distance between the two points in meters as PrecisionT.
  */
 template <typename PrecisionT>
 PrecisionT GeoPoint<PrecisionT>::Distance(const GeoPoint& other) const {
@@ -61,32 +67,33 @@ PrecisionT GeoPoint<PrecisionT>::Distance(const GeoPoint& other) const {
       static_cast<long double>(other.lat()) * static_cast<long double>(kRadPerDegD);
   const long double dphi = phi2 - phi1;
 
-  long double dlambda =
+  long double deltalng =
       static_cast<long double>(other.lng() - lng()) * static_cast<long double>(kRadPerDegD);
-  // No need to wrap at +/-pi for distance; cos terms handle it, but keeping dlambda small helps
+  // No need to wrap at +/-pi for distance; cos terms handle it, but keeping deltalng small helps
   // tiny-angle math
-  if (dlambda > M_PI) {
-    dlambda -= 2.0L * M_PI;
+  if (deltalng > M_PI) {
+    deltalng -= 2.0L * M_PI;
   }
-  if (dlambda < -M_PI) {
-    dlambda += 2.0L * M_PI;
+  if (deltalng < -M_PI) {
+    deltalng += 2.0L * M_PI;
   }
 
   const long double c1 = std::cos(phi1);
   const long double c2 = std::cos(phi2);
 
-  // Haversine (well-conditioned for small angles)
+  // Haversine (numerically stable for small angles)
+  // https://en.wikipedia.org/wiki/Haversine_formula
   const long double sdphi2 = std::sin(dphi * 0.5L);
-  const long double sdlmb2 = std::sin(dlambda * 0.5L);
+  const long double sdlmb2 = std::sin(deltalng * 0.5L);
   long double h = sdphi2 * sdphi2 + c1 * c2 * sdlmb2 * sdlmb2;
 
   // Clamp due to rounding
   h = std::min<long double>(1, std::max<long double>(0, h));
 
-  // For extremely tiny separations, avoid asin(sqrt(h)) altogether
+  // For extremely tiny distances, avoid asin(sqrt(h)) altogether
   // Use equirectangular approximation with hypot, which is relatively stable
   if (h < 1e-24L) {
-    const long double x = dlambda * std::cos((phi1 + phi2) * 0.5L);
+    const long double x = deltalng * std::cos((phi1 + phi2) * 0.5L);
     const long double y = dphi;
     const long double d = static_cast<long double>(kRadEarthMeters) * std::hypot(x, y);
     return static_cast<PrecisionT>(d);
