@@ -21,12 +21,11 @@ on:
       - "setup.cfg"
       - "setup.py"
       - "taginfo.json"
+permissions:
+  contents: read
+  packages: write
 jobs:
   build_and_publish:
-    permissions:
-      contents: read
-      packages: write
-
     strategy:
       matrix:
         include:
