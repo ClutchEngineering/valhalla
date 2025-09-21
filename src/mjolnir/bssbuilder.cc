@@ -185,6 +185,8 @@ std::vector<BSSConnection> project(const GraphTile& local_tile,
     auto best_ped = BestProjection{};
     auto best_bicycle = BestProjection{};
 
+    // Ensures that nearly-equivalent distances result in stable winners
+    // across clang/gcc builds.
     auto distanceEpsilon = 0.000001;
 
     // Loop over all nodes in the tile to find the nearest edge
