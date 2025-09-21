@@ -23,6 +23,10 @@ on:
       - "taginfo.json"
 jobs:
   build_and_publish:
+    permissions:
+      contents: read
+      packages: write
+
     strategy:
       matrix:
         include:
