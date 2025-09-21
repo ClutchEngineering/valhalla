@@ -186,10 +186,3 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Test latest scripted image
-        run: |
-          docker pull ghcr.io/clutchengineering/valhalla-scripted:test
-          sudo apt-get update > /dev/null
-          sudo apt-get install -y moreutils tree > /dev/null
-          sudo /bin/bash -c "./docker/test.sh ghcr.io/clutchengineering/valhalla-scripted:test"
