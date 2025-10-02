@@ -3,6 +3,12 @@
 #include "baldr/graphtile.h"
 #include "baldr/directededge.h"
 #include "baldr/nodeinfo.h"
+#include "baldr/nodetransition.h"
+#include "baldr/accessrestriction.h"
+#include "baldr/admin.h"
+#include "baldr/sign.h"
+#include "baldr/turnlanes.h"
+#include "baldr/laneconnectivity.h"
 #include "midgard/logging.h"
 
 #include <boost/property_tree/ptree.hpp>
@@ -30,27 +36,110 @@ void print_tile_info(const GraphTile* tile) {
   std::cout << header->debug_string() << std::endl;
   std::cout << std::endl;
 
-  std::cout << "=== Nodes ===" << std::endl;
-  for (uint32_t i = 0; i < header->nodecount(); i++) {
-    const auto* node = tile->node(i);
-    std::cout << "Node " << i << ":" << std::endl;
-    std::cout << node->debug_string() << std::endl;
+   // Print nodes
+   std::cout << "=== Nodes (" << header->nodecount() << ") ===" << std::endl;
+   for (uint32_t i = 0; i < header->nodecount(); i++) {
+     const auto* node = tile->node(i);
+     std::cout << "\nNode " << i << ":" << std::endl;
+     std::cout << node->debug_string() << std::endl;
+   }
+   std::cout << std::endl;
+
+   // Print directed edges with raw words
+   std::cout << "=== Directed Edges (" << header->directededgecount() << ") ===" << std::endl;
+   for (uint32_t i = 0; i < header->directededgecount(); i++) {
+     const auto* edge = tile->directededge(i);
+     std::cout << "\nEdge " << i << ":" << std::endl;
+
+     // Print raw 64-bit words for debugging
+     const auto* words = reinterpret_cast<const uint64_t*>(edge);
+     std::cout << "  Raw words: ";
+     for (int w = 0; w < 6; w++) {
+       std::cout << "0x" << std::hex << std::setw(16) << std::setfill('0') << words[w] << " ";
+     }
+     std::cout << std::dec << std::endl;
+
+     std::cout << edge->debug_string() << std::endl;
+   }
+   std::cout << std::endl;
+
+  // Print directed edge extensions
+//  if (header->directededgecount() > 0) {
+//    std::cout << "=== Directed Edge Extensions (" << header->directededgecount() << ") ===" << std::endl;
+//    for (uint32_t i = 0; i < header->directededgecount(); i++) {
+//      const auto* ext = tile->ext_directededge(i);
+//      std::cout << "\nEdge Extension " << i << ":" << std::endl;
+//      std::cout << ext->debug_string() << std::endl;
+//    }
+//    std::cout << std::endl;
+//  }
+
+  // Print node transitions
+  if (header->transitioncount() > 0) {
+    std::cout << "=== Node Transitions (" << header->transitioncount() << ") ===" << std::endl;
+    for (uint32_t i = 0; i < header->transitioncount(); i++) {
+      const auto* trans = tile->transition(i);
+      std::cout << "\nTransition " << i << ":" << std::endl;
+      std::cout << trans->debug_string() << std::endl;
+    }
+    std::cout << std::endl;
   }
 
-  std::cout << "=== Directed Edges ===" << std::endl;
-  for (uint32_t i = 0; i < header->directededgecount(); i++) {
-    const auto* edge = tile->directededge(i);
-    std::cout << "Edge " << i << ":" << std::endl;
+  // Print access restrictions
+  if (header->access_restriction_count() > 0) {
+    std::cout << "=== Access Restrictions (" << header->access_restriction_count() << ") ===" << std::endl;
+    // Access restrictions don't have a simple getter by index, so just note their presence
+    std::cout << "Access restrictions present" << std::endl;
+    std::cout << std::endl;
+  }
 
-    // Print raw 64-bit words for debugging
-    const auto* words = reinterpret_cast<const uint64_t*>(edge);
-    std::cout << "  Raw words: ";
-    for (int w = 0; w < 6; w++) {
-      std::cout << "0x" << std::hex << std::setw(16) << std::setfill('0') << words[w] << " ";
+  // Print admins
+  if (header->admincount() > 0) {
+    std::cout << "=== Admins (" << header->admincount() << ") ===" << std::endl;
+    for (size_t i = 0; i < header->admincount(); i++) {
+      const auto* admin = tile->admin(i);
+      if (admin) {
+        std::cout << "\nAdmin " << i << ":" << std::endl;
+        std::cout << admin->debug_string() << std::endl;
+      }
     }
-    std::cout << std::dec << std::endl;
+    std::cout << std::endl;
+  }
 
-    std::cout << edge->debug_string() << std::endl;
+  // Print signs
+  if (header->signcount() > 0) {
+    std::cout << "=== Signs (" << header->signcount() << ") ===" << std::endl;
+    std::cout << "Sign data is complex - counts: " << header->signcount() << std::endl;
+    std::cout << std::endl;
+  }
+
+  // Print turn lanes
+  if (header->turnlane_count() > 0) {
+    std::cout << "=== Turn Lanes (" << header->turnlane_count() << ") ===" << std::endl;
+    std::cout << "Turn lane data present" << std::endl;
+    std::cout << std::endl;
+  }
+
+  // Print signs
+  if (header->signcount() > 0) {
+    std::cout << "=== Signs (" << header->signcount() << ") ===" << std::endl;
+    std::cout << "Sign data present" << std::endl;
+    std::cout << std::endl;
+  }
+
+  // Print complex restrictions (use offsets as indicators)
+  if (header->complex_restriction_forward_offset() > 0 || header->complex_restriction_reverse_offset() > 0) {
+    std::cout << "=== Complex Restrictions ===" << std::endl;
+    std::cout << "Forward offset: " << header->complex_restriction_forward_offset() << std::endl;
+    std::cout << "Reverse offset: " << header->complex_restriction_reverse_offset() << std::endl;
+    std::cout << std::endl;
+  }
+
+  // Print lane connectivity (use offset as indicator)
+  if (header->lane_connectivity_offset() > 0) {
+    std::cout << "=== Lane Connectivity ===" << std::endl;
+    std::cout << "Lane connectivity offset: " << header->lane_connectivity_offset() << std::endl;
+    std::cout << std::endl;
   }
 }
 

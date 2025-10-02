@@ -3,6 +3,9 @@
 
 #include <valhalla/baldr/graphid.h>
 
+#include <sstream>
+#include <string>
+
 namespace valhalla {
 namespace baldr {
 
@@ -44,6 +47,17 @@ public:
    */
   bool up() const {
     return up_;
+  }
+
+  /**
+   * Returns a string for debugging.
+   */
+  std::string debug_string() const {
+    std::ostringstream os;
+    os << "endnode_: " << GraphId(endnode_) << "\n";
+    os << "up_: " << static_cast<bool>(up_) << "\n";
+    os << "spare_: " << spare_ << "\n";
+    return os.str();
   }
 
 protected:

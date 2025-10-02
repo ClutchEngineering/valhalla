@@ -1414,6 +1414,16 @@ protected:
  */
 class DirectedEdgeExt {
 
+public:
+  /**
+   * Returns a string for debugging.
+   */
+  std::string debug_string() const {
+    std::ostringstream os;
+    os << "spare0_: 0x" << std::hex << spare0_ << std::dec << "\n";
+    return os.str();
+  }
+
 protected:
   uint64_t spare0_ : 64;
 };

@@ -3,6 +3,7 @@
 
 #include <array>
 #include <cstdint>
+#include <sstream>
 #include <string>
 
 namespace valhalla {
@@ -59,6 +60,18 @@ public:
    * @return  Returns the text offset.
    */
   uint32_t country_offset() const;
+
+  /**
+   * Returns a string for debugging.
+   */
+  std::string debug_string() const {
+    std::ostringstream os;
+    os << "country_offset_: " << country_offset_ << "\n";
+    os << "state_offset_: " << state_offset_ << "\n";
+    os << "country_iso_: " << country_iso() << "\n";
+    os << "state_iso_: " << state_iso() << "\n";
+    return os.str();
+  }
 
 protected:
   uint32_t country_offset_;                     // country name offset
