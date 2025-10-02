@@ -4,6 +4,9 @@
 #include "baldr/rapidjson_utils.h"
 #include "midgard/logging.h"
 
+#include <sstream>
+#include <string>
+
 using namespace valhalla::midgard;
 using namespace valhalla::baldr;
 
@@ -76,6 +79,49 @@ NodeInfo::NodeInfo(const PointLL& tile_corner,
   set_tagged_access(tagged_access);
   set_private_access(private_access);
   set_cash_only_toll(cash_only_toll);
+}
+
+std::string NodeInfo::debug_string() const {
+  std::ostringstream os;
+  os.setf(std::ios::boolalpha);
+
+  // 1st 8-byte word
+  os << "lat_offset_: "    << static_cast<unsigned long long>(lat_offset_)    << "\n";
+  os << "lat_offset7_: "   << static_cast<unsigned long long>(lat_offset7_)   << "\n";
+  os << "lon_offset_: "    << static_cast<unsigned long long>(lon_offset_)    << "\n";
+  os << "lon_offset7_: "   << static_cast<unsigned long long>(lon_offset7_)   << "\n";
+  os << "access_: "        << static_cast<unsigned long long>(access_)        << "\n";
+
+  // 2nd 8-byte word
+  os << "edge_index_: "    << static_cast<unsigned long long>(edge_index_)    << "\n";
+  os << "edge_count_: "    << static_cast<unsigned long long>(edge_count_)    << "\n";
+  os << "admin_index_: "   << static_cast<unsigned long long>(admin_index_)   << "\n";
+  os << "timezone_: "      << static_cast<unsigned long long>(timezone_)      << "\n";
+  os << "intersection_: "  << static_cast<unsigned long long>(intersection_)  << "\n";
+  os << "type_: "          << static_cast<unsigned long long>(type_)          << "\n";
+  os << "density_: "       << static_cast<unsigned long long>(density_)       << "\n";
+  os << "traffic_signal_: "<< static_cast<bool>(traffic_signal_)              << "\n";
+  os << "mode_change_: "   << static_cast<bool>(mode_change_)                 << "\n";
+  os << "named_: "         << static_cast<bool>(named_)                       << "\n";
+
+  // 3rd 8-byte word
+  os << "transition_index_: "   << static_cast<unsigned long long>(transition_index_)   << "\n";
+  os << "transition_count_: "   << static_cast<unsigned long long>(transition_count_)   << "\n";
+  os << "local_driveability_: " << static_cast<unsigned long long>(local_driveability_) << "\n";
+  os << "local_edge_count_: "   << static_cast<unsigned long long>(local_edge_count_)   << "\n";
+  os << "drive_on_right_: "     << static_cast<bool>(drive_on_right_)                   << "\n";
+  os << "tagged_access_: "      << static_cast<bool>(tagged_access_)                    << "\n";
+  os << "private_access_: "     << static_cast<bool>(private_access_)                   << "\n";
+  os << "cash_only_toll_: "     << static_cast<bool>(cash_only_toll_)                   << "\n";
+  os << "elevation_: "          << static_cast<unsigned long long>(elevation_)          << "\n";
+  os << "timezone_ext_1_: "     << static_cast<unsigned long long>(timezone_ext_1_)     << "\n";
+  // If you ever enable timezone_ext_2_, add it here.
+  os << "spare2_: "             << static_cast<unsigned long long>(spare2_)             << "\n";
+
+  // 4th 8-byte word (raw headings / transit-connection storage)
+  os << "headings_: "           << static_cast<unsigned long long>(headings_)           << "\n";
+
+  return os.str();
 }
 
 // Sets the latitude and longitude.

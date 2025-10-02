@@ -38,13 +38,7 @@ void print_tile_info(const GraphTile* tile) {
   for (uint32_t i = 0; i < header->nodecount(); i++) {
     const auto* node = tile->node(i);
     std::cout << "Node " << i << ":" << std::endl;
-    std::cout << "  Edge index: " << node->edge_index() << std::endl;
-    std::cout << "  Edge count: " << node->edge_count() << std::endl;
-    std::cout << "  Admin index: " << node->admin_index() << std::endl;
-    std::cout << "  Timezone: " << node->timezone() << std::endl;
-    auto ll = node->latlng(header->base_ll());
-    std::cout << "  LL: (" << ll.lat() << ", " << ll.lng() << ")" << std::endl;
-    std::cout << std::endl;
+    std::cout << node->debug_string() << std::endl;
   }
 
   std::cout << "=== Directed Edges ===" << std::endl;
