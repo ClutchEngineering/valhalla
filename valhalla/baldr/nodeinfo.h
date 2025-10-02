@@ -494,6 +494,8 @@ public:
    */
   void json(const graph_tile_ptr& tile, rapidjson::writer_wrapper_t& writer) const;
 
+  std::string debug_string() const;
+
 protected:
   // Organized into 8-byte words so structure will align to 8 byte boundaries.
 
