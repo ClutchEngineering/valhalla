@@ -589,6 +589,8 @@ public:
     tile_size_ = offset;
   }
 
+  std::string debug_string() const;
+
 protected:
   // TODO when c++20 bitfields can be initialized here
   // GraphId (tileid and level) of this tile. Data quality metrics.

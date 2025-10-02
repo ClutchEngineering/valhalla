@@ -2,6 +2,8 @@
 #include "config.h"
 
 #include <algorithm>
+#include <sstream>
+#include <string>
 
 using namespace valhalla::baldr;
 
@@ -85,6 +87,94 @@ std::pair<uint32_t, uint32_t> GraphTileHeader::bin_offset(size_t index) const {
     return std::make_pair(index == 0 ? 0 : bin_offsets_[index - 1], bin_offsets_[index]);
   }
   throw std::runtime_error("Bin out of bounds");
+}
+
+std::string GraphTileHeader::debug_string() const {
+  std::ostringstream os;
+  os.setf(std::ios::boolalpha);
+
+  // Bitfields (graphid/quality/flags)
+  os << "graphid_: " << static_cast<unsigned long long>(graphid_) << "\n";
+  os << "density_: " << static_cast<unsigned long long>(density_) << "\n";
+  os << "name_quality_: " << static_cast<unsigned long long>(name_quality_) << "\n";
+  os << "speed_quality_: " << static_cast<unsigned long long>(speed_quality_) << "\n";
+  os << "exit_quality_: " << static_cast<unsigned long long>(exit_quality_) << "\n";
+  os << "has_elevation_: " << static_cast<bool>(has_elevation_) << "\n";
+  os << "has_ext_directededge_: " << static_cast<bool>(has_ext_directededge_) << "\n";
+
+  // Base LL
+  os << "base_ll_.first (lng): " << base_ll_.first << "\n";
+  os << "base_ll_.second (lat): " << base_ll_.second << "\n";
+
+  // Version and dataset id
+  os << "version_: " << version_.data() << "\n";
+  os << "dataset_id_: " << static_cast<unsigned long long>(dataset_id_) << "\n";
+
+  // Record counts (bitfields)
+  os << "nodecount_: " << static_cast<unsigned long long>(nodecount_) << "\n";
+  os << "directededgecount_: " << static_cast<unsigned long long>(directededgecount_) << "\n";
+  os << "predictedspeeds_count_: " << static_cast<unsigned long long>(predictedspeeds_count_) << "\n";
+  os << "spare1_: " << static_cast<unsigned long long>(spare1_) << "\n";
+
+  // Mixed-width counts & spares
+  os << "transitioncount_: " << static_cast<unsigned long long>(transitioncount_) << "\n";
+  os << "spare3_: " << static_cast<unsigned long long>(spare3_) << "\n";
+  os << "turnlane_count_: " << static_cast<unsigned long long>(turnlane_count_) << "\n";
+  os << "spare4_: " << static_cast<unsigned long long>(spare4_) << "\n";
+  os << "transfercount_: " << static_cast<unsigned long long>(transfercount_) << "\n";
+  os << "spare2_: " << static_cast<unsigned long long>(spare2_) << "\n";
+
+  // Transit counts
+  os << "departurecount_: " << static_cast<unsigned long long>(departurecount_) << "\n";
+  os << "stopcount_: " << static_cast<unsigned long long>(stopcount_) << "\n";
+  os << "spare5_: " << static_cast<unsigned long long>(spare5_) << "\n";
+  os << "routecount_: " << static_cast<unsigned long long>(routecount_) << "\n";
+  os << "schedulecount_: " << static_cast<unsigned long long>(schedulecount_) << "\n";
+
+  // More counts
+  os << "signcount_: " << static_cast<unsigned long long>(signcount_) << "\n";
+  os << "spare6_: " << static_cast<unsigned long long>(spare6_) << "\n";
+  os << "access_restriction_count_: " << static_cast<unsigned long long>(access_restriction_count_) << "\n";
+  os << "admincount_: " << static_cast<unsigned long long>(admincount_) << "\n";
+  os << "spare7_: " << static_cast<unsigned long long>(spare7_) << "\n";
+
+  // Spare words
+  os << "spareword0_: " << static_cast<unsigned long long>(spareword0_) << "\n";
+  os << "spareword1_: " << static_cast<unsigned long long>(spareword1_) << "\n";
+
+  // Offsets (variable-size sections)
+  os << "complex_restriction_forward_offset_: " << complex_restriction_forward_offset_ << "\n";
+  os << "complex_restriction_reverse_offset_: " << complex_restriction_reverse_offset_ << "\n";
+  os << "edgeinfo_offset_: " << edgeinfo_offset_ << "\n";
+  os << "textlist_offset_: " << textlist_offset_ << "\n";
+
+  // Date created
+  os << "date_created_: " << date_created_ << "\n";
+
+  // Bin offsets
+  os << "bin_offsets_: [";
+  for (size_t i = 0; i < bin_offsets_.size(); ++i) {
+    os << bin_offsets_[i];
+    if (i + 1 < bin_offsets_.size()) os << ", ";
+  }
+  os << "]\n";
+
+  // Lane connectivity and predicted speeds offsets
+  os << "lane_connectivity_offset_: " << lane_connectivity_offset_ << "\n";
+  os << "predictedspeeds_offset_: " << predictedspeeds_offset_ << "\n";
+
+  // Tile size
+  os << "tile_size_: " << tile_size_ << "\n";
+
+  // Empty slots
+  os << "empty_slots_: [";
+  for (size_t i = 0; i < empty_slots_.size(); ++i) {
+    os << empty_slots_[i];
+    if (i + 1 < empty_slots_.size()) os << ", ";
+  }
+  os << "]\n";
+
+  return os.str();
 }
 
 } // namespace baldr

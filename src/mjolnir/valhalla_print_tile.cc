@@ -27,11 +27,7 @@ void print_tile_info(const GraphTile* tile) {
   const auto* header = tile->header();
   std::cout << "=== Tile Header ===" << std::endl;
   std::cout << "GraphId: 0x" << std::hex << tile->id().value << std::dec << std::endl;
-  std::cout << "Version: " << header->version() << std::endl;
-  std::cout << "Date: " << header->date_created() << std::endl;
-  std::cout << "Node count: " << header->nodecount() << std::endl;
-  std::cout << "Edge count: " << header->directededgecount() << std::endl;
-  std::cout << "End offset: " << header->end_offset() << std::endl;
+  std::cout << header->debug_string() << std::endl;
   std::cout << std::endl;
 
   std::cout << "=== Nodes ===" << std::endl;
