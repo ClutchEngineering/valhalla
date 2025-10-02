@@ -192,6 +192,9 @@ void print_tile_info(const GraphTile* tile) {
 }
 
 int main(int argc, char** argv) {
+  // Disable logging output to keep stdout clean for diffing
+  logging::Configure({{"type", ""}});
+
   const auto program = std::filesystem::path(__FILE__).stem().string();
 
   try {
