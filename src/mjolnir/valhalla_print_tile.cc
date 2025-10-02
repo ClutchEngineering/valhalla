@@ -45,7 +45,7 @@ void print_tile_info(const GraphTile* tile) {
    }
    std::cout << std::endl;
 
-   // Print directed edges with raw words
+   // Print directed edges with raw words and edgeinfo
    std::cout << "=== Directed Edges (" << header->directededgecount() << ") ===" << std::endl;
    for (uint32_t i = 0; i < header->directededgecount(); i++) {
      const auto* edge = tile->directededge(i);
@@ -60,19 +60,32 @@ void print_tile_info(const GraphTile* tile) {
      std::cout << std::dec << std::endl;
 
      std::cout << edge->debug_string() << std::endl;
+
+     // Print edgeinfo
+     auto edgeinfo = tile->edgeinfo(edge);
+     std::cout << "  EdgeInfo:" << std::endl;
+     std::cout << "    wayid: " << edgeinfo.wayid() << std::endl;
+     std::cout << "    name_count: " << edgeinfo.name_count() << std::endl;
+     auto names = edgeinfo.GetNames();
+     for (size_t n = 0; n < names.size(); n++) {
+       std::cout << "    name[" << n << "]: " << names[n] << std::endl;
+     }
+     std::cout << "    encoded_shape_size: " << edgeinfo.encoded_shape_size() << std::endl;
+     auto encoded_shape = edgeinfo.encoded_shape();
+     std::cout << "    encoded_shape_hex: ";
+     for (char c : encoded_shape) {
+       std::cout << std::hex << std::setw(2) << std::setfill('0') << (static_cast<unsigned int>(static_cast<unsigned char>(c))) << " ";
+     }
+     std::cout << std::dec << std::endl;
+     std::cout << "    mean_elevation: " << edgeinfo.mean_elevation() << std::endl;
+     std::cout << "    speed_limit: " << edgeinfo.speed_limit() << std::endl;
    }
    std::cout << std::endl;
 
-  // Print directed edge extensions
-//  if (header->directededgecount() > 0) {
-//    std::cout << "=== Directed Edge Extensions (" << header->directededgecount() << ") ===" << std::endl;
-//    for (uint32_t i = 0; i < header->directededgecount(); i++) {
-//      const auto* ext = tile->ext_directededge(i);
-//      std::cout << "\nEdge Extension " << i << ":" << std::endl;
-//      std::cout << ext->debug_string() << std::endl;
-//    }
-//    std::cout << std::endl;
-//  }
+  // Print directed edge extensions (disabled - crashes)
+  // if (header->has_ext_directededge()) {
+  //   std::cout << "=== Directed Edge Extensions ===" << std::endl;
+  // }
 
   // Print node transitions
   if (header->transitioncount() > 0) {
@@ -88,8 +101,15 @@ void print_tile_info(const GraphTile* tile) {
   // Print access restrictions
   if (header->access_restriction_count() > 0) {
     std::cout << "=== Access Restrictions (" << header->access_restriction_count() << ") ===" << std::endl;
-    // Access restrictions don't have a simple getter by index, so just note their presence
-    std::cout << "Access restrictions present" << std::endl;
+    for (uint32_t i = 0; i < header->directededgecount(); i++) {
+      auto restrictions = tile->GetAccessRestrictions(i, kAllAccess);
+      if (!restrictions.empty()) {
+        std::cout << "\nEdge " << i << " restrictions:" << std::endl;
+        for (const auto& r : restrictions) {
+          std::cout << "  type: " << static_cast<int>(r.type()) << ", value: " << r.value() << ", modes: " << r.modes() << std::endl;
+        }
+      }
+    }
     std::cout << std::endl;
   }
 
@@ -109,14 +129,34 @@ void print_tile_info(const GraphTile* tile) {
   // Print signs
   if (header->signcount() > 0) {
     std::cout << "=== Signs (" << header->signcount() << ") ===" << std::endl;
-    std::cout << "Sign data is complex - counts: " << header->signcount() << std::endl;
+    for (uint32_t i = 0; i < header->directededgecount(); i++) {
+      const auto* edge = tile->directededge(i);
+      if (edge->sign()) {
+        auto signs = tile->GetSigns(i);
+        if (!signs.empty()) {
+          std::cout << "\nEdge " << i << " signs:" << std::endl;
+          for (const auto& s : signs) {
+            std::cout << "  type: " << static_cast<int>(s.type()) << ", text: " << s.text() << std::endl;
+          }
+        }
+      }
+    }
     std::cout << std::endl;
   }
 
   // Print turn lanes
   if (header->turnlane_count() > 0) {
     std::cout << "=== Turn Lanes (" << header->turnlane_count() << ") ===" << std::endl;
-    std::cout << "Turn lane data present" << std::endl;
+    for (uint32_t i = 0; i < header->directededgecount(); i++) {
+      auto lanes = tile->turnlanes(i);
+      if (!lanes.empty()) {
+        std::cout << "\nEdge " << i << " turn lanes: ";
+        for (auto mask : lanes) {
+          std::cout << mask << " ";
+        }
+        std::cout << std::endl;
+      }
+    }
     std::cout << std::endl;
   }
 
@@ -135,10 +175,18 @@ void print_tile_info(const GraphTile* tile) {
     std::cout << std::endl;
   }
 
-  // Print lane connectivity (use offset as indicator)
+  // Print lane connectivity
   if (header->lane_connectivity_offset() > 0) {
     std::cout << "=== Lane Connectivity ===" << std::endl;
-    std::cout << "Lane connectivity offset: " << header->lane_connectivity_offset() << std::endl;
+    for (uint32_t i = 0; i < header->directededgecount(); i++) {
+      auto connectivity = tile->GetLaneConnectivity(i);
+      if (!connectivity.empty()) {
+        std::cout << "\nEdge " << i << " lane connectivity:" << std::endl;
+        for (const auto& lc : connectivity) {
+          std::cout << "  from: " << lc.from() << ", to: " << lc.to() << ", to_lanes: " << lc.to_lanes() << ", from_lanes: " << lc.from_lanes() << std::endl;
+        }
+      }
+    }
     std::cout << std::endl;
   }
 }
