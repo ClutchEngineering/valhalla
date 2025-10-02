@@ -6,6 +6,9 @@
 #include <valhalla/baldr/rapidjson_fwd.h>
 #include <valhalla/baldr/turn.h>
 
+#include <string>
+#include <sstream>
+
 namespace valhalla {
 namespace baldr {
 
@@ -1204,6 +1207,103 @@ public:
    *  @param writer The writer json object to represent the object
    */
   void json(rapidjson::writer_wrapper_t& writer) const;
+
+  /**
+   * Returns a multi-line string of all internal bitfield properties and their values.
+   * Each line is "name: value". Intended for debugging/inspection.
+   */
+  std::string debug_string() const {
+    std::ostringstream os;
+    os.setf(std::ios::boolalpha);
+
+    // 1st 8-byte word
+    os << "endnode_: " << static_cast<unsigned long long>(endnode_) << "\n";
+    os << "restrictions_: " << static_cast<unsigned long long>(restrictions_) << "\n";
+    os << "opp_index_: " << static_cast<unsigned long long>(opp_index_) << "\n";
+    os << "forward_: " << static_cast<bool>(forward_) << "\n";
+    os << "leaves_tile_: " << static_cast<bool>(leaves_tile_) << "\n";
+    os << "ctry_crossing_: " << static_cast<bool>(ctry_crossing_) << "\n";
+
+    // 2nd 8-byte word
+    os << "edgeinfo_offset_: " << static_cast<unsigned long long>(edgeinfo_offset_) << "\n";
+    os << "access_restriction_: " << static_cast<unsigned long long>(access_restriction_) << "\n";
+    os << "start_restriction_: " << static_cast<unsigned long long>(start_restriction_) << "\n";
+    os << "end_restriction_: " << static_cast<unsigned long long>(end_restriction_) << "\n";
+    os << "complex_restriction_: " << static_cast<bool>(complex_restriction_) << "\n";
+    os << "dest_only_: " << static_cast<bool>(dest_only_) << "\n";
+    os << "not_thru_: " << static_cast<bool>(not_thru_) << "\n";
+
+    // 3rd 8-byte word
+    os << "speed_: " << static_cast<unsigned long long>(speed_) << "\n";
+    os << "free_flow_speed_: " << static_cast<unsigned long long>(free_flow_speed_) << "\n";
+    os << "constrained_flow_speed_: " << static_cast<unsigned long long>(constrained_flow_speed_) << "\n";
+    os << "truck_speed_: " << static_cast<unsigned long long>(truck_speed_) << "\n";
+    os << "name_consistency_: " << static_cast<unsigned long long>(name_consistency_) << "\n";
+    os << "use_: " << static_cast<unsigned long long>(use_) << "\n";
+    os << "lanecount_: " << static_cast<unsigned long long>(lanecount_) << "\n";
+    os << "density_: " << static_cast<unsigned long long>(density_) << "\n";
+    os << "classification_: " << static_cast<unsigned long long>(classification_) << "\n";
+    os << "surface_: " << static_cast<unsigned long long>(surface_) << "\n";
+    os << "toll_: " << static_cast<bool>(toll_) << "\n";
+    os << "roundabout_: " << static_cast<bool>(roundabout_) << "\n";
+    os << "truck_route_: " << static_cast<bool>(truck_route_) << "\n";
+    os << "has_predicted_speed_: " << static_cast<bool>(has_predicted_speed_) << "\n";
+
+    // 4th 8-byte word
+    os << "forwardaccess_: " << static_cast<unsigned long long>(forwardaccess_) << "\n";
+    os << "reverseaccess_: " << static_cast<unsigned long long>(reverseaccess_) << "\n";
+    os << "max_up_slope_: " << static_cast<unsigned long long>(max_up_slope_) << "\n";
+    os << "max_down_slope_: " << static_cast<unsigned long long>(max_down_slope_) << "\n";
+    os << "sac_scale_: " << static_cast<unsigned long long>(sac_scale_) << "\n";
+    os << "cycle_lane_: " << static_cast<unsigned long long>(cycle_lane_) << "\n";
+    os << "bike_network_: " << static_cast<bool>(bike_network_) << "\n";
+    os << "use_sidepath_: " << static_cast<bool>(use_sidepath_) << "\n";
+    os << "dismount_: " << static_cast<bool>(dismount_) << "\n";
+    os << "sidewalk_left_: " << static_cast<bool>(sidewalk_left_) << "\n";
+    os << "sidewalk_right_: " << static_cast<bool>(sidewalk_right_) << "\n";
+    os << "shoulder_: " << static_cast<bool>(shoulder_) << "\n";
+    os << "lane_conn_: " << static_cast<bool>(lane_conn_) << "\n";
+    os << "turnlanes_: " << static_cast<bool>(turnlanes_) << "\n";
+    os << "sign_: " << static_cast<bool>(sign_) << "\n";
+    os << "internal_: " << static_cast<bool>(internal_) << "\n";
+    os << "tunnel_: " << static_cast<bool>(tunnel_) << "\n";
+    os << "bridge_: " << static_cast<bool>(bridge_) << "\n";
+    os << "traffic_signal_: " << static_cast<bool>(traffic_signal_) << "\n";
+    os << "spare1_: " << static_cast<unsigned long long>(spare1_) << "\n";
+    os << "deadend_: " << static_cast<bool>(deadend_) << "\n";
+    os << "bss_connection_: " << static_cast<bool>(bss_connection_) << "\n";
+    os << "stop_sign_: " << static_cast<bool>(stop_sign_) << "\n";
+    os << "yield_sign_: " << static_cast<bool>(yield_sign_) << "\n";
+    os << "hov_type_: " << static_cast<unsigned long long>(hov_type_) << "\n";
+    os << "indoor_: " << static_cast<bool>(indoor_) << "\n";
+    os << "lit_: " << static_cast<bool>(lit_) << "\n";
+    os << "dest_only_hgv_: " << static_cast<bool>(dest_only_hgv_) << "\n";
+    os << "spare4_: " << static_cast<unsigned long long>(spare4_) << "\n";
+
+    // 5th 8-byte word
+    os << "turntype_: " << static_cast<unsigned long long>(turntype_) << "\n";
+    os << "edge_to_left_: " << static_cast<unsigned long long>(edge_to_left_) << "\n";
+    os << "length_: " << static_cast<unsigned long long>(length_) << "\n";
+    os << "weighted_grade_: " << static_cast<unsigned long long>(weighted_grade_) << "\n";
+    os << "curvature_: " << static_cast<unsigned long long>(curvature_) << "\n";
+
+    // Stop impact / line
+    os << "stopimpact_.s.stopimpact: " << static_cast<unsigned long long>(stopimpact_.s.stopimpact) << "\n";
+    os << "stopimpact_.s.edge_to_right: " << static_cast<unsigned long long>(stopimpact_.s.edge_to_right) << "\n";
+    os << "stopimpact_.lineid: " << static_cast<unsigned long long>(stopimpact_.lineid) << "\n";
+
+    // 6th 8-byte word (u32 bitfield)
+    os << "localedgeidx_: " << static_cast<unsigned long long>(localedgeidx_) << "\n";
+    os << "opp_local_idx_: " << static_cast<unsigned long long>(opp_local_idx_) << "\n";
+    os << "shortcut_: " << static_cast<unsigned long long>(shortcut_) << "\n";
+    os << "superseded_: " << static_cast<unsigned long long>(superseded_) << "\n";
+    os << "is_shortcut_: " << static_cast<bool>(is_shortcut_) << "\n";
+    os << "speed_type_: " << static_cast<unsigned long long>(speed_type_) << "\n";
+    os << "named_: " << static_cast<bool>(named_) << "\n";
+    os << "link_: " << static_cast<bool>(link_) << "\n";
+
+    return os.str();
+  }
 
 protected:
   // 1st 8-byte word
